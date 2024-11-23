@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-100">
+  <div class="flex items-center justify-center bg-gray-100">
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
       <h2 class="text-2xl font-bold mb-6 text-center">Sign Up</h2>
       <form @submit.prevent="handleSignup">
@@ -12,6 +12,7 @@
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-500"
               required
           />
+          <p v-if="errors.name" class="text-red-500 text-sm">{{ errors.name }}</p>
         </div>
         <div class="mb-4">
           <label for="email" class="block text-gray-700">Email</label>
@@ -22,6 +23,7 @@
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-500"
               required
           />
+          <p v-if="errors.email" class="text-red-500 text-sm">{{ errors.email }}</p>
         </div>
         <div class="mb-4">
           <label for="password" class="block text-gray-700">Password</label>
@@ -32,6 +34,7 @@
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-500"
               required
           />
+          <p v-if="errors.password" class="text-red-500 text-sm">{{ errors.password }}</p>
         </div>
         <button
             type="submit"
@@ -45,29 +48,40 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import {ref} from 'vue';
 
 const name = ref('');
 const email = ref('');
 const password = ref('');
+const errors = ref({});
+const toast = useToast();
 
 const handleSignup = async () => {
+  errors.value = {};
   try {
     const response = await fetch('/api/signup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name: name.value, email: email.value, password: password.value }),
+      body: JSON.stringify({name: name.value, email: email.value, password: password.value}),
     });
 
     if (!response.ok) {
-      throw new Error('Signup failed');
+      const errorData = await response.json();
+      if (errorData.error?.issues) {
+        errorData.error.issues.forEach(issue => {
+          errors.value[issue.path[0]] = issue.message;
+        });
+      } else {
+        toast.error('An error occurred. Please try again.');
+      }
+    } else {
+      toast.success('Account created successfully.');
     }
-
-    // Handle successful signup (e.g., redirect to login page)
   } catch (error) {
-    console.error('Error:', error);
+    console.error(error.message);
+    toast.error('An error occurred. Please try again.');
   }
 };
 </script>

@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  demo:
+    build: .
+    container_name: nuxt_demo_app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - NODE_ENV=production
+  postgres:
+    image: postgres:latest
+    container_name: my-postgres
+    environment:
+      POSTGRES_USER: clientuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: demoappdb
+    ports:
+      - "5432:5432"
