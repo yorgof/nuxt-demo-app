@@ -1,8 +1,10 @@
 export default defineNuxtRouteMiddleware((to, from) => {
     const isLoggedIn = useState('isLoggedIn', () => false); // Replace with actual authentication logic
 
-    if (to.path === '/login') {
-        return;
+    const unRestrictedPaths = ['/', '/login', '/signup'];
+
+    if (unRestrictedPaths.includes(to.path)) {
+        return
     }
 
     if (!isLoggedIn.value) {

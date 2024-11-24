@@ -1,6 +1,6 @@
 <!-- pages/Login.vue -->
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-100">
+  <div class="flex items-center justify-center bg-gray-100">
     <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
       <h1 class="text-2xl font-bold text-center">Login</h1>
       <form @submit.prevent="handleLogin" class="space-y-4">
@@ -20,14 +20,34 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useState } from '#app';
 
 const email = ref('');
 const password = ref('');
+const toast = useToast();
+const isLoggedIn = useState('isLoggedIn', () => false);
 
-const handleLogin = () => {
-  // Handle login logic here
-  console.log('Email:', email.value);
-  console.log('Password:', password.value);
+const handleLogin = async () => {
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email: email.value, password: password.value }),
+    });
+
+    if (response.ok) {
+      isLoggedIn.value = true; // Set the state to logged in
+      await navigateTo('/');
+      toast.success('Login successful.');
+    } else {
+      toast.error('Login failed. Please check your credentials.');
+    }
+  } catch (error) {
+    console.error(error.message);
+    toast.error('An error occurred. Please try again.');
+  }
 };
 </script>
 
