@@ -20,10 +20,12 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useState } from '#app';
 
 const email = ref('');
 const password = ref('');
 const toast = useToast();
+const isLoggedIn = useState('isLoggedIn', () => false);
 
 const handleLogin = async () => {
   try {
@@ -32,16 +34,12 @@ const handleLogin = async () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({email: email.value, password: password.value}),
+      body: JSON.stringify({ email: email.value, password: password.value }),
     });
 
     if (response.ok) {
-      // add the returned token to the local storage
-      const { token } = await response.json();
-      localStorage.setItem('token', token);
-      // redirect to the dashboard
-      await navigateTo('/')
-
+      isLoggedIn.value = true; // Set the state to logged in
+      await navigateTo('/');
       toast.success('Login successful.');
     } else {
       toast.error('Login failed. Please check your credentials.');

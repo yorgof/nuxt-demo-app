@@ -1,22 +1,27 @@
-version: '3.8'
-
 services:
-  demo:
+  app:
     build: .
-    container_name: nuxt_demo_app
+    container_name: nuxt-demo-app
     ports:
       - "3000:3000"
     depends_on:
       - postgres
     environment:
-      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_URL=postgres://clientuser:mypassword@postgres:5432/demoappdb
       - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
   postgres:
     image: postgres:latest
-    container_name: my-postgres
+    container_name: nuxt-demo-app-postgres
     environment:
       POSTGRES_USER: clientuser
       POSTGRES_PASSWORD: mypassword
       POSTGRES_DB: demoappdb
     ports:
       - "5432:5432"
+    volumes:
+      - be13840d7d17dfa8b5a446404d3054186c24d86bf07207e1ec321c27240587e6:/var/lib/postgresql/data
+
+volumes:
+  be13840d7d17dfa8b5a446404d3054186c24d86bf07207e1ec321c27240587e6:
+    external: true

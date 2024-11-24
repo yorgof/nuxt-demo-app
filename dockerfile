@@ -1,4 +1,4 @@
-FROM node:23 AS build
+FROM node:23-alpine AS build
 
 WORKDIR /build
 
@@ -7,6 +7,8 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+
+RUN npx prisma generate
 
 RUN npm run build
 

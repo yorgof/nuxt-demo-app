@@ -24,19 +24,20 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-const isLoggedIn = ref(false); // Replace with actual authentication logic
-const router = useRouter();
+const isLoggedIn = useState('isLoggedIn', () => false);
+const toast = useToast();
 
 const handleLogout = async () => {
   try {
     await fetch('/api/logout', { method: 'POST' });
     isLoggedIn.value = false;
-    router.push('/');
+    navigateTo('/login');
+    toast.success('Logout successful.');
   } catch (error) {
     console.error('Logout failed:', error);
+    toast.error('An error occurred. Please try again.');
   }
 };
 </script>

@@ -8,12 +8,6 @@ const userSchema = z.object({
     password: z.string()
 })
 
-const secret = process.env.JWT_SECRET
-
-if (!secret) {
-    throw new Error('JWT_SECRET is not defined')
-}
-
 export default defineEventHandler(async (event) => {
     try {
         const result = await readValidatedBody(event, body => userSchema.safeParse(body))
@@ -51,15 +45,17 @@ export default defineEventHandler(async (event) => {
             name: user.name
         }
 
-        const token = jwt.sign(payload, secret, {
-            expiresIn: '30d'
+        const token = jwt.sign(payload, process.env.JWT_SECRET!!, {
+            expiresIn: '1h'
         });
 
-        console.log(token)
-
-        return ({
-            token
+        setCookie(event, 'login-token', token, {
+            httpOnly: true, // make the cookie accessible only by the web server
+            //secure: true, // ensure the cookie is sent over HTTPS
+            sameSite: 'strict' // control cross-site request behavior
         })
+
+        return { message: 'Login successful' }
     } catch (error: any) {
         console.error(error.message)
         event.node.res.statusCode = 500;
